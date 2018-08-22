@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script src="/static/jquery-3.3.1.js"></script>
+<script>
+    window.opener.PopResponse('{{ res.pk }}',"{{ res.text }}",'{{ res.response_id }}');
+    window.close()
+</script>
+</html>

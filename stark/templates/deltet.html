@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h4>是否确认删除</h4>
+    <form action="" method="post">
+        {% csrf_token %}
+       <button class="btn btn-danger">确认删除</button>
+        <button><a href="{{ url }}">取消删除</a></button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="/static/bootstrap/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        .active{
+            color: gainsboro;
+        }
+    </style>
+</head>
+<body>
+    <h1>查看页面</h1>
+    <div class="row">
+        <div class="col-md-offset-3 col-md-6">
+            <a class="btn-primary btn" href="{{ add_url }}">添加页面</a>
+            {% if show_list_obj.config.search_field %}
+                <form method="get" class="pull-right" action="">
+                    <input type="text" class="" name="q" value="{{ show_list_obj.config.keyword }}">
+                    <input type="submit" value="search" class="btn btn-success">
+                </form>
+            {% endif %}
+
+            <form action="" method="post">
+                {% csrf_token %}
+                <select name="actions" class="form-control" style="width: 200px; display: inline-block; vertical-align: -1px; margin: 8px 2px">
+                    {% for action in show_list_obj.get_actions %}
+                        <option value="{{ action.name }}">{{ action.desc }}</option>
+                    {% endfor %}
+
+                </select>
+                <button type="submit"  class="btn-success btn">GO</button>
+                <table class="table table-bordered ">
+                    <thead>
+                            <tr>
+                               {% for header in header_list %}
+                                <th>{{ header }}</th>
+                               {% endfor %}
+                            </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in show_list_obj.get_list %}
+                            <tr>
+                                {% for foo in item %}
+                                    <th>{{ foo }}</th>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+                <nav class="pull-right">
+                    <ul class="pagination">
+                        {{ show_list_obj.pager.page_html|safe }}
+                    </ul>
+
+                </nav>
+            </form>
+        </div>
+        <div class="col-md-3">
+          {% for title,links in  show_list_obj.get_filter_link_tags.items %}
+            <div class="panel-success panel " style="margin-top: 30px">
+                <div class="panel-heading">{{ title.upper }}</div>
+                     <div class="panel-body">
+                        {% for item in links %}
+                            <p> {{ item|safe }}</p>
+                        {% endfor %}
+                     </div>
+            </div>
+          {% endfor %}
+
+        </div>
+    </div>
+
+</body>
+<script src="/static/jquery-3.3.1.js"></script>
+<script>
+    $(function () {
+        bind_choice()
+    });
+
+    function bind_choice() {
+        $('.choice_all').click(function () {
+            if($(this).prop('checked')){
+                $('.choice_item').prop('checked',true)
+            }else {
+                $('.choice_item').prop('checked',false)
+            }
+        })
+    }
+</script>
+</html>

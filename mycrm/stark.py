@@ -1,5 +1,6 @@
 # Author: harry.cai
 # DATE: 2018/8/20
+import datetime
 from .models import *
 from stark.service import starkAdmin
 from django.utils.safestring import mark_safe
@@ -8,6 +9,13 @@ from django.shortcuts import redirect,HttpResponse, render
 starkAdmin.site.register(Department)
 starkAdmin.site.register(Course)
 starkAdmin.site.register(School)
+
+
+class ConsultRecordConfig(starkAdmin.StarkModel):
+    list_display = ['customer', 'consultant', 'date', 'note']
+
+
+starkAdmin.site.register(ConsultRecord, ConsultRecordConfig)
 
 
 class ClassListConfig(starkAdmin.StarkModel):
@@ -59,12 +67,58 @@ class CustomerConfig(starkAdmin.StarkModel):
 
         temp = []
         temp.append(re_path('cancel_course/(\d+)/(\d+)', self.cancel_course))
+        temp.append(re_path('public/', self.public_customer))
+        temp.append(re_path('further/(\d+)', self.further))
+        temp.append(re_path("mycustomer", self.my_customer))
         return temp
+
+    def public_customer(self, request):
+        '''
+        公共客户， 三天未跟进或者15天为成单转换为公共客户
+        :return:
+        '''
+
+        from django.db.models import Q
+        now = datetime.datetime.now()
+        delta_day3 = datetime.timedelta(days=3)
+        delta_day15 = datetime.timedelta(days=3)
+
+        customer_list = Customer.objects.filter(
+            Q(last_consult_date__lt=now-delta_day3) |
+            Q(recv_date__lt=now-delta_day15),
+            status=2)
+        return render(request, 'public.html', locals())
+
+    def further(self, request, customer_id):
+        user_id = 2  # 获取user_id request.session.get('user_id')
+        # 为该客户更改课程顾问和对应的时间
+        from django.db.models import Q
+        now = datetime.datetime.now()
+        delta_day3 = datetime.timedelta(days=3)
+        delta_day15 = datetime.timedelta(days=3)
+
+        ret = Customer.objects.filter(pk=customer_id).filter(Q(last_consult_date__lt=now-delta_day3) | Q(recv_date__lt=now-delta_day15)).\
+            update(consultant=user_id, last_consult_date=now, recv_date=now)
+        if not ret:
+            return HttpResponse('已经有人跟进！')
+        CustomerDistribute.objects.create(customer_id=customer_id, consultant_id=user_id, date=now, status=1)
+
+        return HttpResponse('确认跟进')
+
+    def my_customer(self, request):
+        '''
+        查看当前登录用户下的客户
+        :param request:
+        :return:
+        '''
+        user_id = 2
+        customer_distribute_list = CustomerDistribute.objects.filter(consultant_id=user_id)
+        return render(request, 'my_customer.html', locals())
+
     list_display = ['name', display_gender, display_course]
 
 
 starkAdmin.site.register(Customer, CustomerConfig)
-starkAdmin.site.register(ConsultRecord)
 
 
 class CourseRecordConfig(starkAdmin.StarkModel):
@@ -148,9 +202,12 @@ class CourseRecordConfig(starkAdmin.StarkModel):
         if head:
             return "录入成绩"
         return mark_safe("<a href='record_score/%s'>录入成绩</a>" % obj.pk)
+
     patch_study_record.short_description = '批量生成学习记录'
     list_display = ['class_obj', "day_num", 'teacher', record, record_score]
     actions = [patch_study_record]
+
+
 starkAdmin.site.register(CourseRecord, CourseRecordConfig)
 
 
@@ -163,6 +220,7 @@ class StudyRecordConfig(starkAdmin.StarkModel):
     list_filter = ['course_record']
     list_display = ['student', 'course_record', 'record', 'score', ]
     actions = [patch_late]
+
 
 starkAdmin.site.register(StudyRecord, StudyRecordConfig)
 
@@ -208,5 +266,8 @@ class StudentConfig(starkAdmin.StarkModel):
         return mark_safe("<a href='score_view/%s'>查看成绩</a>" % obj.pk)
     list_display = ['customer', 'class_list', score_show]
 
+
 starkAdmin.site.register(Student, StudentConfig)
 starkAdmin.site.register(UserInfo)
+
+

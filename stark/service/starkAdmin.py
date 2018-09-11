@@ -20,7 +20,7 @@ class ShowList(object):
         # 请求的URL
         base_url = self.request.path
         # 分页功能
-        self.pager = Pagination(data_count, current_page, self.request.GET, base_url, per_page=2, max_show=10)
+        self.pager = Pagination(data_count, current_page, self.request.GET, base_url, per_page=10, max_show=10)
         try:
             self.page_data = self.data_list[self.pager.start:self.pager.end]
         except Exception as e:
@@ -373,8 +373,8 @@ class StarkModel(object):
                 obj = form.save()
                 _url = self.list_url()
                 return redirect(_url)
-            return render(request, 'add_view.html', locals())
-        return render(request, 'add_view.html', locals())
+            return render(request, 'edit_view.html', locals())
+        return render(request, 'edit_view.html', locals())
 
 
 class StarkSite(object):
@@ -384,7 +384,6 @@ class StarkSite(object):
     def register(self, model, stark_class=None):
         if not stark_class:
             stark_class = StarkModel
-        print(stark_class)
         self.registry[model] = stark_class(model, self)
 
     @property

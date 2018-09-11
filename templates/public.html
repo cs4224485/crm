@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="/static/bootstrap/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <h3>公共客户</h3>
+     <div class="container">
+        <div class="row">
+            <div class="col-md-9">
+
+                  <table class="table-bordered table table-strap table-strip">
+                    <thead>
+                         <tr>
+                             <th>客户姓名</th>
+                             <th>班主任</th>
+                             <th>成绩</th>
+                             <th>销售</th>
+                             <th>跟进详情</th>
+                             <th>确认跟进</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       {% for customer in customer_list  %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ customer.name }}</td>
+                                <td>{{ customer.qq }}</td>
+                                <td>{{ customer.consultant }}</td>
+                                <td><a href="/stark/mycrm/consultrecord/?customer={{ customer.pk }}">跟进记录</a> </td>
+                                <td><a href="/stark/mycrm/customer/further/{{ customer.pk }}">确认跟进</a> </td>
+                            </tr>
+                       {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+     </div>
+
+</body>
+</html>

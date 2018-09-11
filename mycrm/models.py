@@ -1,5 +1,5 @@
 from django.db import models
-
+from rbacapp.models import User
 # Create your models here.
 
 
@@ -25,7 +25,7 @@ class UserInfo(models.Model):
     username = models.CharField(verbose_name='用户名', max_length=32)
     password = models.CharField(verbose_name='密码', max_length=64)
     email = models.EmailField(verbose_name='邮箱', max_length=64)
-
+    user = models.OneToOneField(to=User, null=True, on_delete=models.CASCADE)
     depart = models.ForeignKey(verbose_name='部门', to="Department", to_field="code", on_delete=models.CASCADE)
 
     def __str__(self):
@@ -273,3 +273,17 @@ class StudyRecord(models.Model):
 
     def __str__(self):
         return "{0}-{1}".format(self.course_record, self.student)
+
+
+class CustomerDistribute(models.Model):
+    customer = models.ForeignKey("Customer", related_name="customers", on_delete=models.CASCADE)
+    consultant = models.ForeignKey(verbose_name="课程顾问", to="UserInfo", on_delete=models.CASCADE)
+    date = models.DateField()
+    status_choice =(
+        (1, "正在跟进"),
+        (2, "已报名"),
+        (3, "三天未跟进"),
+        (4, "15天未成单"),
+    )
+    status = models.IntegerField(choices=status_choice, default=1)
+    memo = models.CharField(max_length=255)
